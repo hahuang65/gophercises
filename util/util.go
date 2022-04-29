@@ -11,20 +11,24 @@ type Subcommand interface {
 	Run([]string)
 }
 
-func Exit(msg string) {
+func Exit(msg string, statusCode int) {
 	fmt.Println(msg)
-	os.Exit(1)
+	os.Exit(statusCode)
+}
+
+func Fail(msg string) {
+	Exit(msg, 1)
 }
 
 func ReadCSV(path string) [][]string {
 	csvFile, err := os.Open(path)
 	if err != nil {
-		Exit(fmt.Sprintf("Could not read CSV file `" + path + "`"))
+		Fail(fmt.Sprintf("Could not read CSV file `" + path + "`"))
 	}
 
 	lines, err := csv.NewReader(csvFile).ReadAll()
 	if err != nil {
-		Exit(fmt.Sprintf("Could not parse CSV file `" + path + "`"))
+		Fail(fmt.Sprintf("Could not parse CSV file `" + path + "`"))
 	}
 
 	return lines

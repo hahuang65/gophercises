@@ -20,6 +20,6 @@ func main() {
 	if cmd, ok := subcommands[subcommand]; ok {
 		cmd.Run(os.Args[2:])
 	} else {
-		util.Exit(fmt.Sprintf("%s is not a valid subcommand", subcommand))
+		util.Fail(fmt.Sprintf("%s is not a valid subcommand", subcommand))
 	}
 }
