@@ -22,8 +22,10 @@ func Fail(msg string) {
 
 func ReadCSV(path string) [][]string {
 	csvFile, err := os.Open(path)
+	defer csvFile.Close()
+
 	if err != nil {
-		Fail(fmt.Sprintf("Could not read CSV file `" + path + "`"))
+		Fail(fmt.Sprintf("Could not open CSV file `" + path + "`"))
 	}
 
 	lines, err := csv.NewReader(csvFile).ReadAll()
@@ -32,4 +34,14 @@ func ReadCSV(path string) [][]string {
 	}
 
 	return lines
+}
+
+func ReadFile(path string) []byte {
+	bytes, err := os.ReadFile(path)
+
+	if err != nil {
+		Fail(fmt.Sprintf("Could not read file `" + path + "`"))
+	}
+
+	return bytes
 }

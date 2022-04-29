@@ -5,6 +5,7 @@ import (
 	"os"
 
 	"git.sr.ht/~hwrd/gophercises/quiz"
+	"git.sr.ht/~hwrd/gophercises/urlShortener"
 	"git.sr.ht/~hwrd/gophercises/util"
 )
 
@@ -15,6 +16,7 @@ func addSubcommand(m map[string]util.Subcommand, cmd util.Subcommand) {
 func main() {
 	subcommands := make(map[string]util.Subcommand)
 	addSubcommand(subcommands, &quiz.Quiz{})
+	addSubcommand(subcommands, &urlShortener.URLShortener{})
 
 	subcommand := os.Args[1]
 	if cmd, ok := subcommands[subcommand]; ok {
