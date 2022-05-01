@@ -6,8 +6,11 @@ import (
 	"net/http"
 
 	"git.sr.ht/~hwrd/gophercises/util"
+	"github.com/boltdb/bolt"
 	"gopkg.in/yaml.v2"
 )
+
+const BoltDBBucket = "URLShortener"
 
 type URLShortener struct{}
 
@@ -30,13 +33,27 @@ func (u *URLShortener) Run(args []string) {
 	// `MapHandler` and `YAMLHandler` functions.
 	var (
 		yamlPath string
+		dbPath   string
 	)
 
 	cmd := flag.NewFlagSet(u.CommandName(), flag.ExitOnError)
 	cmd.StringVar(&yamlPath, "yaml", fmt.Sprintf("%s/urls.yaml", u.CommandName()), "filepath to the YAML containing URLs")
+	cmd.StringVar(&dbPath, "db", fmt.Sprintf("%s/urls.db", u.CommandName()), "filepath to the BoltDB file containing URLs")
 	cmd.Parse(args)
 
 	mux := defaultMux()
+
+	db, err := bolt.Open(dbPath, 0600, nil)
+	defer db.Close()
+
+	if err != nil {
+		util.Fail("Could not open BoltDB file `" + dbPath + "`")
+	}
+
+	seedDB(db)
+	if err != nil {
+		util.Fail(fmt.Sprintf("Could not seed BoltDB: %s", err))
+	}
 
 	pathsToUrls := map[string]string{
 		"/urlshort-godoc": "https://godoc.org/github.com/gophercises/urlshort",
@@ -49,8 +66,11 @@ func (u *URLShortener) Run(args []string) {
 	// Build the YAMLHandler using the mapHandler as the fallback
 	yamlHandler := yamlHandler(yamlPath, mapHandler)
 
+	// Build the DBHandler using the YAMLhandler as the fallback
+	dbHandler := dbHandler(db, yamlHandler)
+
 	fmt.Println("Starting the server on :8080")
-	http.ListenAndServe(":8080", yamlHandler)
+	http.ListenAndServe(":8080", dbHandler)
 }
 
 func defaultMux() *http.ServeMux {
@@ -75,7 +95,6 @@ func mapHandler(pathsToUrls map[string]string, fallback http.Handler) http.Handl
 
 		if expanded, ok := pathsToUrls[requested]; ok {
 			http.Redirect(w, r, expanded, http.StatusPermanentRedirect)
-			fmt.Println("Found URL to expand!")
 		} else {
 			fallback.ServeHTTP(w, r)
 		}
@@ -118,4 +137,36 @@ func mapFromYAML(yamlPath string) map[string]string {
 	}
 
 	return mappedYAML
+}
+
+func dbHandler(db *bolt.DB, fallback http.Handler) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		var expanded []byte
+		requested := r.URL.Path
+
+		db.View(func(tx *bolt.Tx) error {
+			b := tx.Bucket([]byte(BoltDBBucket))
+			expanded = b.Get([]byte(requested))
+
+			return nil
+		})
+
+		if expanded != nil {
+			http.Redirect(w, r, string(expanded), http.StatusPermanentRedirect)
+		} else {
+			fallback.ServeHTTP(w, r)
+		}
+	}
+
+}
+
+func seedDB(db *bolt.DB) error {
+	err := db.Update(func(tx *bolt.Tx) error {
+		b, err := tx.CreateBucketIfNotExists([]byte(BoltDBBucket))
+		err = b.Put([]byte("/hwrd"), []byte("https://hwrd.me"))
+		err = b.Put([]byte("/github"), []byte("https://github.com/hahuang65"))
+		return err
+	})
+
+	return err
 }
