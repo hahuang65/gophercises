@@ -4,7 +4,11 @@ import (
 	"encoding/json"
 	"flag"
 	"fmt"
+	"html/template"
+	"log"
+	"net/http"
 	"os"
+	"strings"
 
 	"git.sr.ht/~hwrd/gophercises/util"
 )
@@ -25,7 +29,15 @@ func (c *ChooseYourOwnAdventure) Run(args []string) {
 	cmd.Parse(args)
 
 	story := parseStory(jsonPath)
-	fmt.Println(story)
+	html := template.Must(template.ParseFiles("chooseYourOwnAdventure/template.html"))
+	handler := storyHandler{story: story, template: html}
+
+	mux := http.NewServeMux()
+	mux.Handle("/", handler)
+	port := ":3000"
+
+	fmt.Printf("Starting server on port %s\n", port)
+	http.ListenAndServe(":3000", mux)
 }
 
 type story map[string]chapter
@@ -39,6 +51,11 @@ type chapter struct {
 type choice struct {
 	Text    string `json:"text"`
 	Chapter string `json:"arc"`
+}
+
+type storyHandler struct {
+	story    story
+	template *template.Template
 }
 
 func parseStory(path string) story {
@@ -59,4 +76,24 @@ func parseStory(path string) story {
 	}
 
 	return s
+}
+
+func (h storyHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	p := strings.TrimSpace(r.URL.Path)
+
+	if p == "" || p == "/" {
+		p = "/intro"
+	}
+
+	p = p[1:]
+
+	if chapter, ok := h.story[p]; ok {
+		err := h.template.Execute(w, chapter)
+		if err != nil {
+			log.Printf("%v", err)
+			http.Error(w, "Something went wrong...", http.StatusInternalServerError)
+		}
+		return
+	}
+	http.Error(w, "Chapter not found.", http.StatusNotFound)
 }
