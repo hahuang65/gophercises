@@ -1,4 +1,4 @@
-package linkParser
+package link_parser
 
 import (
 	"flag"
@@ -14,7 +14,7 @@ import (
 type LinkParser struct{}
 
 func (l *LinkParser) CommandName() string {
-	return "linkParser"
+	return "link_parser"
 }
 
 func (l *LinkParser) Run(args []string) {

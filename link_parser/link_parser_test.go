@@ -1,4 +1,4 @@
-package linkParser
+package link_parser
 
 import (
 	"os"

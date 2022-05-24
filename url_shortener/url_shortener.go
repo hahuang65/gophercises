@@ -1,4 +1,4 @@
-package urlShortener
+package url_shortener
 
 import (
 	"flag"
@@ -20,7 +20,7 @@ type url struct {
 }
 
 func (u *URLShortener) CommandName() string {
-	return "urlShortener"
+	return "url_shortener"
 }
 
 func (u *URLShortener) Run(args []string) {

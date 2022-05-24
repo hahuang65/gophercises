@@ -1,4 +1,4 @@
-package chooseYourOwnAdventure
+package choose_your_own_adventure
 
 import (
 	"encoding/json"
@@ -16,7 +16,7 @@ import (
 type ChooseYourOwnAdventure struct{}
 
 func (c *ChooseYourOwnAdventure) CommandName() string {
-	return "chooseYourOwnAdventure"
+	return "choose_your_own_adventure"
 }
 
 func (c *ChooseYourOwnAdventure) Run(args []string) {
@@ -29,7 +29,7 @@ func (c *ChooseYourOwnAdventure) Run(args []string) {
 	cmd.Parse(args)
 
 	story := parseStory(jsonPath)
-	html := template.Must(template.ParseFiles("chooseYourOwnAdventure/template.html"))
+	html := template.Must(template.ParseFiles(fmt.Sprintf("%s/template.html", c.CommandName())))
 	handler := storyHandler{story: story, template: html}
 
 	mux := http.NewServeMux()
