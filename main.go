@@ -5,6 +5,7 @@ import (
 	"os"
 
 	"git.sr.ht/~hwrd/gophercises/chooseYourOwnAdventure"
+	"git.sr.ht/~hwrd/gophercises/linkParser"
 	"git.sr.ht/~hwrd/gophercises/quiz"
 	"git.sr.ht/~hwrd/gophercises/urlShortener"
 	"git.sr.ht/~hwrd/gophercises/util"
@@ -17,6 +18,7 @@ func addSubcommand(m map[string]util.Subcommand, cmd util.Subcommand) {
 func main() {
 	subcommands := make(map[string]util.Subcommand)
 	addSubcommand(subcommands, &chooseYourOwnAdventure.ChooseYourOwnAdventure{})
+	addSubcommand(subcommands, &linkParser.LinkParser{})
 	addSubcommand(subcommands, &quiz.Quiz{})
 	addSubcommand(subcommands, &urlShortener.URLShortener{})
 
