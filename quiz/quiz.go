@@ -1,13 +1,16 @@
 package quiz
 
 import (
+	"encoding/csv"
 	"flag"
 	"fmt"
+	"io"
 	"math/rand"
+	"os"
 	"strings"
 	"time"
 
-	"git.sr.ht/~hwrd/gophercises/util"
+	"git.sr.ht/~hwrd/gophercises/exit"
 )
 
 type Quiz struct{}
@@ -29,8 +32,14 @@ func (q *Quiz) Run(args []string) {
 	cmd.IntVar(&timeLimit, "timer", 30, "Amount of time allowed")
 	cmd.Parse(args)
 
-	lines := util.ReadCSV(csvPath)
-	problems := parseProblems(lines)
+	csvFile, err := os.Open(csvPath)
+	defer csvFile.Close()
+
+	if err != nil {
+		exit.Fail(fmt.Sprintf("Could not open CSV file `" + csvPath + "`"))
+	}
+
+	problems := parseProblems(csvFile)
 	poseProblems(problems, timeLimit, shuffle)
 }
 
@@ -39,7 +48,12 @@ type problem struct {
 	answer   string
 }
 
-func parseProblems(lines [][]string) []problem {
+func parseProblems(r io.Reader) []problem {
+	lines, err := csv.NewReader(r).ReadAll()
+	if err != nil {
+		exit.Fail("Could not parse CSV file.")
+	}
+
 	problems := make([]problem, len(lines))
 
 	for i, line := range lines {
@@ -52,15 +66,19 @@ func parseProblems(lines [][]string) []problem {
 	return problems
 }
 
+func shuffleProblems(problems []problem) {
+	rand.Seed(time.Now().UnixNano())
+	rand.Shuffle(len(problems), func(i, j int) {
+		problems[i], problems[j] = problems[j], problems[i]
+	})
+}
+
 func poseProblems(problems []problem, timeLimit int, shuffle bool) {
 	correct := 0
 	possible := len(problems)
 
 	if shuffle {
-		rand.Seed(time.Now().UnixNano())
-		rand.Shuffle(len(problems), func(i, j int) {
-			problems[i], problems[j] = problems[j], problems[i]
-		})
+		shuffleProblems(problems)
 	}
 
 	timer := time.NewTimer(time.Duration(timeLimit) * time.Second)
@@ -75,7 +93,8 @@ func poseProblems(problems []problem, timeLimit int, shuffle bool) {
 		fmt.Printf("%s = ", problem.question)
 		var answer string
 		fmt.Scanf("%s\n", &answer)
-		if strings.TrimSpace(answer) == problem.answer {
+
+		if checkAnswer(strings.TrimSpace(answer), problem) {
 			correct++
 		}
 	}
@@ -83,6 +102,10 @@ func poseProblems(problems []problem, timeLimit int, shuffle bool) {
 	endQuiz(correct, possible)
 }
 
+func checkAnswer(a string, p problem) bool {
+	return a == p.answer
+}
+
 func endQuiz(correct int, possible int) {
-	util.Exit(fmt.Sprintf("You answered %d correctly out of %d", correct, possible), 0)
+	exit.WithMsgAndCode(fmt.Sprintf("You answered %d correctly out of %d", correct, possible), 0)
 }

@@ -10,7 +10,7 @@ import (
 	"os"
 	"strings"
 
-	"git.sr.ht/~hwrd/gophercises/util"
+	"git.sr.ht/~hwrd/gophercises/exit"
 )
 
 type ChooseYourOwnAdventure struct{}
@@ -62,7 +62,7 @@ func parseStory(path string) story {
 	file, err := os.Open(path)
 
 	if err != nil {
-		util.Fail("Could not open JSON file `" + path + "`")
+		exit.Fail("Could not open JSON file `" + path + "`")
 	}
 
 	defer file.Close()
@@ -72,7 +72,7 @@ func parseStory(path string) story {
 	err = d.Decode(&s)
 
 	if err != nil {
-		util.Fail("Could not unmarshal JSON")
+		exit.Fail("Could not unmarshal JSON")
 	}
 
 	return s

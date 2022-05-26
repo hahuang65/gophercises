@@ -7,7 +7,7 @@ import (
 	"os"
 	"strings"
 
-	"git.sr.ht/~hwrd/gophercises/util"
+	"git.sr.ht/~hwrd/gophercises/exit"
 	"golang.org/x/net/html"
 )
 
@@ -28,7 +28,7 @@ func (l *LinkParser) Run(args []string) {
 
 	f, err := os.Open(htmlFile)
 	if err != nil {
-		util.Fail("Could not open HTML file at " + htmlFile)
+		exit.Fail("Could not open HTML file at " + htmlFile)
 	}
 	defer f.Close()
 
@@ -44,7 +44,7 @@ func parseLinks(r io.Reader) []link {
 	doc, err := html.Parse(r)
 
 	if err != nil {
-		util.Fail("Could not parse HTML")
+		exit.Fail("Could not parse HTML")
 	}
 
 	nodes := linkNodes(doc)

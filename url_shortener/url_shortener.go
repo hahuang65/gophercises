@@ -4,8 +4,9 @@ import (
 	"flag"
 	"fmt"
 	"net/http"
+	"os"
 
-	"git.sr.ht/~hwrd/gophercises/util"
+	"git.sr.ht/~hwrd/gophercises/exit"
 	"github.com/boltdb/bolt"
 	"gopkg.in/yaml.v2"
 )
@@ -47,12 +48,12 @@ func (u *URLShortener) Run(args []string) {
 	defer db.Close()
 
 	if err != nil {
-		util.Fail("Could not open BoltDB file `" + dbPath + "`")
+		exit.Fail("Could not open BoltDB file `" + dbPath + "`")
 	}
 
 	seedDB(db)
 	if err != nil {
-		util.Fail(fmt.Sprintf("Could not seed BoltDB: %s", err))
+		exit.Fail(fmt.Sprintf("Could not seed BoltDB: %s", err))
 	}
 
 	pathsToUrls := map[string]string{
@@ -126,10 +127,10 @@ func mapFromYAML(yamlPath string) map[string]string {
 	var urls []url
 	mappedYAML := make(map[string]string)
 
-	yamlBytes := util.ReadFile(yamlPath)
+	yamlBytes := readFile(yamlPath)
 	err := yaml.Unmarshal(yamlBytes, &urls)
 	if err != nil {
-		util.Fail("Could not parse YAML in `" + yamlPath + "`")
+		exit.Fail("Could not parse YAML in `" + yamlPath + "`")
 	}
 
 	for _, url := range urls {
@@ -169,4 +170,14 @@ func seedDB(db *bolt.DB) error {
 	})
 
 	return err
+}
+
+func readFile(path string) []byte {
+	bytes, err := os.ReadFile(path)
+
+	if err != nil {
+		exit.Fail(fmt.Sprintf("Could not read file `" + path + "`"))
+	}
+
+	return bytes
 }

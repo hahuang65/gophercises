@@ -5,18 +5,23 @@ import (
 	"os"
 
 	"git.sr.ht/~hwrd/gophercises/choose_your_own_adventure"
+	"git.sr.ht/~hwrd/gophercises/exit"
 	"git.sr.ht/~hwrd/gophercises/link_parser"
 	"git.sr.ht/~hwrd/gophercises/quiz"
 	"git.sr.ht/~hwrd/gophercises/url_shortener"
-	"git.sr.ht/~hwrd/gophercises/util"
 )
 
-func addSubcommand(m map[string]util.Subcommand, cmd util.Subcommand) {
+type subcommand interface {
+	CommandName() string
+	Run([]string)
+}
+
+func addSubcommand(m map[string]subcommand, cmd subcommand) {
 	m[cmd.CommandName()] = cmd
 }
 
 func main() {
-	subcommands := make(map[string]util.Subcommand)
+	subcommands := make(map[string]subcommand)
 	addSubcommand(subcommands, &choose_your_own_adventure.ChooseYourOwnAdventure{})
 	addSubcommand(subcommands, &link_parser.LinkParser{})
 	addSubcommand(subcommands, &quiz.Quiz{})
@@ -26,6 +31,6 @@ func main() {
 	if cmd, ok := subcommands[subcommand]; ok {
 		cmd.Run(os.Args[2:])
 	} else {
-		util.Fail(fmt.Sprintf("%s is not a valid subcommand", subcommand))
+		exit.Fail(fmt.Sprintf("%s is not a valid subcommand", subcommand))
 	}
 }
