@@ -8,6 +8,7 @@ import (
 	"git.sr.ht/~hwrd/gophercises/exit"
 	"git.sr.ht/~hwrd/gophercises/link_parser"
 	"git.sr.ht/~hwrd/gophercises/quiz"
+	"git.sr.ht/~hwrd/gophercises/sitemap"
 	"git.sr.ht/~hwrd/gophercises/url_shortener"
 )
 
@@ -26,6 +27,7 @@ func main() {
 	addSubcommand(subcommands, &link_parser.LinkParser{})
 	addSubcommand(subcommands, &quiz.Quiz{})
 	addSubcommand(subcommands, &url_shortener.URLShortener{})
+	addSubcommand(subcommands, &sitemap.Sitemap{})
 
 	subcommand := os.Args[1]
 	if cmd, ok := subcommands[subcommand]; ok {

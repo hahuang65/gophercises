@@ -32,15 +32,15 @@ func (l *LinkParser) Run(args []string) {
 	}
 	defer f.Close()
 
-	fmt.Printf("Parsed links:\n%+v", parseLinks(f))
+	fmt.Printf("Parsed links:\n%+v", ParseLinks(f))
 }
 
-type link struct {
-	href string
-	text string
+type Link struct {
+	Href string
+	Text string
 }
 
-func parseLinks(r io.Reader) []link {
+func ParseLinks(r io.Reader) []Link {
 	doc, err := html.Parse(r)
 
 	if err != nil {
@@ -49,7 +49,7 @@ func parseLinks(r io.Reader) []link {
 
 	nodes := linkNodes(doc)
 
-	var links []link
+	var links []Link
 	for _, n := range nodes {
 		links = append(links, linkify(n))
 	}
@@ -57,13 +57,13 @@ func parseLinks(r io.Reader) []link {
 	return links
 }
 
-func linkify(n *html.Node) link {
-	link := link{}
+func linkify(n *html.Node) Link {
+	link := Link{}
 
 	for _, attr := range n.Attr {
 		if attr.Key == "href" {
-			link.href = attr.Val
-			link.text = strings.Join(strings.Fields(linkText(n)), " ")
+			link.Href = attr.Val
+			link.Text = strings.Join(strings.Fields(linkText(n)), " ")
 			break
 		}
 	}

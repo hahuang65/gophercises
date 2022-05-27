@@ -8,11 +8,11 @@ import (
 
 func TestEx1(t *testing.T) {
 	doc, _ := os.Open("ex1.html")
-	got := parseLinks(doc)
-	want := []link{
+	got := ParseLinks(doc)
+	want := []Link{
 		{
-			href: "/other-page",
-			text: "A link to another page",
+			Href: "/other-page",
+			Text: "A link to another page",
 		},
 	}
 
@@ -23,15 +23,15 @@ func TestEx1(t *testing.T) {
 
 func TestEx2(t *testing.T) {
 	doc, _ := os.Open("ex2.html")
-	got := parseLinks(doc)
-	want := []link{
+	got := ParseLinks(doc)
+	want := []Link{
 		{
-			href: "https://www.twitter.com/joncalhoun",
-			text: "Check me out on twitter",
+			Href: "https://www.twitter.com/joncalhoun",
+			Text: "Check me out on twitter",
 		},
 		{
-			href: "https://github.com/gophercises",
-			text: "Gophercises is on Github!",
+			Href: "https://github.com/gophercises",
+			Text: "Gophercises is on Github!",
 		},
 	}
 
@@ -42,19 +42,19 @@ func TestEx2(t *testing.T) {
 
 func TestEx3(t *testing.T) {
 	doc, _ := os.Open("ex3.html")
-	got := parseLinks(doc)
-	want := []link{
+	got := ParseLinks(doc)
+	want := []Link{
 		{
-			href: "#",
-			text: "Login",
+			Href: "#",
+			Text: "Login",
 		},
 		{
-			href: "/lost",
-			text: "Lost? Need help?",
+			Href: "/lost",
+			Text: "Lost? Need help?",
 		},
 		{
-			href: "https://twitter.com/marcusolsson",
-			text: "@marcusolsson",
+			Href: "https://twitter.com/marcusolsson",
+			Text: "@marcusolsson",
 		},
 	}
 
@@ -65,11 +65,11 @@ func TestEx3(t *testing.T) {
 
 func TestEx4(t *testing.T) {
 	doc, _ := os.Open("ex4.html")
-	got := parseLinks(doc)
-	want := []link{
+	got := ParseLinks(doc)
+	want := []Link{
 		{
-			href: "/dog-cat",
-			text: "dog cat",
+			Href: "/dog-cat",
+			Text: "dog cat",
 		},
 	}
 
